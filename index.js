@@ -3,6 +3,8 @@ const { fetchCountryNyt, fetchStateNyt, fetchCountyNyt } = require('./util/dataF
 // const stateDict = require('./util/name_fips_pop.json');
 // const { greatest } = require('d3-array');
 
+// *** Creates a dictionary lookup of counties for each state:
+
 // const createDict = async () => {
 //   const stateData = await fetchStateNyt();
 //   const countyData = await fetchCountyNyt();
