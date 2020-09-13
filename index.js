@@ -46,21 +46,15 @@ const writeCountyFiles = async () => {
 
 const writeStateFiles = async () => {
   const stateData = await fetchStateNyt();
-  stateData.forEach((value, key) => {
-    // console.log(value)
-    // const entry = {
-    //   state: value[0].state,
-    //   fips: value[0].fips,
-    //   data: value.map(d => {
-    //     const { date, totalCases, totalDeaths, newCases, newDeaths } = d;
-    //     return { date, totalCases, totalDeaths, newCases, newDeaths };
-    //   })
-    // }
-    // const json = JSON.stringify(entry);
-    // fs.writeFileSync(`./completed/states/${statesLowerCased[entry.state]}.json`, json);
-    console.log(key)
-  })
+  for ([key, value] of stateData.entries()) {
+    const abbreviated = value.map(entry => {
+      const { state, fips, ...rest } = entry; //ignore state and fips
+      return rest;
+    })
+    const json = JSON.stringify(abbreviated);
+    fs.writeFileSync(`./completed/states/${key}.json`, json);
+  }
 }
 
-//writeCountyFiles();
+writeCountyFiles();
 writeStateFiles();
