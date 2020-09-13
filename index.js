@@ -64,3 +64,5 @@ const writeCountryFile = async () => {
 writeCountyFiles();
 writeStateFiles();
 writeCountryFile();
+
+//TO-DO: Setup isomorphic-git to commit files to github "backend"
