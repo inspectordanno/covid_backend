@@ -1,8 +1,7 @@
 const fs = require('fs');
 const { fetchCountryNyt, fetchStateNyt, fetchCountyNyt } = require('./util/dataFetches');
-const stateDict = require('./util/name_fips_pop.json');
-const { greatest } = require('d3-array');
-const statesLowerCased = require( './util/states_lower_case.json');
+// const stateDict = require('./util/name_fips_pop.json');
+// const { greatest } = require('d3-array');
 
 // const createDict = async () => {
 //   const stateData = await fetchStateNyt();
@@ -42,8 +41,6 @@ const writeCountyFiles = async () => {
   })
 }
 
-//figure out how to write u.s. state files
-
 const writeStateFiles = async () => {
   const stateData = await fetchStateNyt();
   for ([key, value] of stateData.entries()) {
@@ -56,5 +53,12 @@ const writeStateFiles = async () => {
   }
 }
 
+const writeCountryFile = async () => {
+  const countryData = await fetchCountryNyt();
+  const json = JSON.stringify(countryData);
+  fs.writeFileSync('./completed/country.json', json);
+}
+
 writeCountyFiles();
 writeStateFiles();
+writeCountryFile();
