@@ -1,9 +1,14 @@
-const fs = require('fs');
-const http = require('isomorphic-git/http/node');
-const git = require('isomorphic-git')
-const globby = require('globby');
-require('dotenv').config()
-const { fetchCountryNyt, fetchStateNyt, fetchCountyNyt } = require('./util/dataFetches');
+const fs = require("fs");
+const http = require("isomorphic-git/http/node");
+const git = require("isomorphic-git");
+const globby = require("globby");
+require("dotenv").config();
+const { utcToZonedTime, format } = require("date-fns-tz");
+const {
+  fetchCountryNyt,
+  fetchStateNyt,
+  fetchCountyNyt,
+} = require("./util/dataFetches");
 // const stateDict = require('./util/name_fips_pop.json');
 // const { greatest } = require('d3-array');
 
@@ -37,52 +42,57 @@ const writeCountyFiles = async () => {
       state: value[0].state,
       fips: value[0].fips,
       pop_2019: value[0].pop_2019,
-      data: value.map(d => {
+      data: value.map((d) => {
         const { date, totalCases, totalDeaths, newCases, newDeaths } = d;
         return { date, totalCases, totalDeaths, newCases, newDeaths };
-      })
-     }
+      }),
+    };
     const json = JSON.stringify(entry);
     fs.writeFileSync(`./completed/counties/${key}.json`, json);
-  })
-}
+  });
+};
 
 const writeStateFiles = async () => {
   const stateData = await fetchStateNyt();
   for ([key, value] of stateData.entries()) {
-    const abbreviated = value.map(entry => {
+    const abbreviated = value.map((entry) => {
       const { state, fips, ...rest } = entry; //ignore state and fips
       return rest;
-    })
+    });
     const json = JSON.stringify(abbreviated);
     fs.writeFileSync(`./completed/states/${key}.json`, json);
   }
-}
+};
 
 const writeCountryFile = async () => {
   const countryData = await fetchCountryNyt();
   const json = JSON.stringify(countryData);
-  fs.writeFileSync('./completed/country.json', json);
-}
+  fs.writeFileSync("./completed/country.json", json);
+};
 
 const writeFiles = () => {
   writeCountyFiles();
   writeStateFiles();
   writeCountryFile();
-  console.log('files written');
-}
+  console.log("files written");
+};
+
+const getDate = () => {
+  const timeZone = "America/New_York";
+  const zonedDate = utcToZonedTime(new Date(), timeZone);
+  const pattern = "yyyy-MM-dd hh:mm:ss a z";
+  const outputDate = format(zonedDate, pattern, { timeZone });
+  return outputDate;
+};
 
 const writeGithub = async () => {
-  const dir = __dirname
+  const dir = __dirname;
 
   //adds all files
-  const paths = await globby(['./**', './**/.*'], { gitignore: true });
+  const paths = await globby(["./**", "./**/.*"], { gitignore: true });
   for (const filepath of paths) {
-      await git.add({ fs, dir, filepath });
+    await git.add({ fs, dir, filepath });
   }
-
-  const d = new Date();
-  const date = `${d.getMonth()}-${d.getDate()}-${d.getFullYear()}`
 
   //commits files
   await git.commit({
@@ -90,9 +100,9 @@ const writeGithub = async () => {
     dir,
     author: {
       name: process.env.NAME,
-      email: process.env.EMAIL
+      email: process.env.EMAIL,
     },
-    message: `Committed data files ${date}`
+    message: `Committed data files ${getDate()}`,
   });
 
   //pushes files to Github
@@ -102,15 +112,12 @@ const writeGithub = async () => {
     dir,
     onAuth: () => ({
       username: process.env.GITHUB_TOKEN,
-    })
+    }),
   });
 
-  console.log('pushed files to Github');
-}
+  console.log("pushed files to Github");
+};
 
-const runProgram = () => {
-  writeFiles();
-  writeGithub();
-}
-
-runProgram();
+//run program
+writeFiles();
+writeGithub();
