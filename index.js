@@ -1,8 +1,8 @@
+require("dotenv").config();
 const fs = require("fs");
 const http = require("isomorphic-git/http/node");
 const git = require("isomorphic-git");
 const globby = require("globby");
-require("dotenv").config();
 const { utcToZonedTime, format } = require("date-fns-tz");
 const {
   fetchCountryNyt,
