@@ -108,8 +108,8 @@ const writeGithub = async () => {
   console.log('pushed files to Github');
 }
 
-const runProgram = async () => {
-  await writeFiles();
+const runProgram = () => {
+  writeFiles();
   writeGithub();
 }
 
