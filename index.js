@@ -1,4 +1,8 @@
 const fs = require('fs');
+const http = require('isomorphic-git/http/node');
+const git = require('isomorphic-git')
+const globby = require('globby');
+require('dotenv').config()
 const { fetchCountryNyt, fetchStateNyt, fetchCountyNyt } = require('./util/dataFetches');
 // const stateDict = require('./util/name_fips_pop.json');
 // const { greatest } = require('d3-array');
@@ -61,8 +65,52 @@ const writeCountryFile = async () => {
   fs.writeFileSync('./completed/country.json', json);
 }
 
-writeCountyFiles();
-writeStateFiles();
-writeCountryFile();
+const writeFiles = () => {
+  writeCountyFiles();
+  writeStateFiles();
+  writeCountryFile();
+  console.log('files written');
+}
 
-//TO-DO: Setup isomorphic-git to commit files to github "backend"
+const writeGithub = async () => {
+  const dir = __dirname
+
+  //adds all files
+  const paths = await globby(['./**', './**/.*'], { gitignore: true });
+  for (const filepath of paths) {
+      await git.add({ fs, dir, filepath });
+  }
+
+  const d = new Date();
+  const date = `${d.getMonth()}-${d.getDate()}-${d.getFullYear()}`
+
+  //commits files
+  await git.commit({
+    fs,
+    dir,
+    author: {
+      name: process.env.NAME,
+      email: process.env.EMAIL
+    },
+    message: `Committed data files ${date}`
+  });
+
+  //pushes files to Github
+  await git.push({
+    fs,
+    http,
+    dir,
+    onAuth: () => ({
+      username: process.env.GITHUB_TOKEN,
+    })
+  });
+
+  console.log('pushed files to Github');
+}
+
+const runProgram = async () => {
+  await writeFiles();
+  writeGithub();
+}
+
+runProgram();
