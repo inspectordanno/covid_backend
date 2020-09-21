@@ -110,6 +110,7 @@ const writeGithub = async () => {
     fs,
     http,
     dir,
+    url: 'https://github.com/inspectordanno/covid_us_backend.git',
     onAuth: () => ({
       username: process.env.GITHUB_TOKEN,
     }),
