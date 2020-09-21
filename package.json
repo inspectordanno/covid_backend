@@ -11,6 +11,9 @@
     "type": "git",
     "url": "git+https://github.com/inspectordanno/covid_backend.git"
   },
+  "engines": {
+    "node": "14.8"
+  },
   "author": "Dan Spector",
   "license": "MIT",
   "bugs": {
